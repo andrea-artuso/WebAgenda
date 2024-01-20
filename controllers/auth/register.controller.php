@@ -29,13 +29,14 @@
                 if ($_POST['password'] == $_POST['password1']){
                     $pw_hash = openssl_digest($_POST['password'], "SHA256");
                     $private_key = md5(rand() . time());
-                    
+
                     $ins_query = "INSERT INTO users (username, password, email, user_private_key) VALUES (?,?,?,?);";
                     if ($stmt = $dbc->prepare($ins_query)){
                         $stmt->bind_param("ssss", $us_hash, $pw_hash, $email, $private_key);
 
                         if ($stmt->execute()){
-                            echo "<div class='alert alert-success' role='alert'>Account successfully added</div>";
+                            $_SESSION['success'] = "Account successfully added";
+                            header("Location: home");
                         } else {
                             echo "<div class='alert alert-danger' role='alert'>Cannot add the account</div>";
                         }

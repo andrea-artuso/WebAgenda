@@ -21,7 +21,10 @@
 <body>
 
 <?php
-//require "components/header.component.php";
+require "components/header.component.php";
+
+require "components/sidebar.component.php";
+echo "<br>";
 
 if (isset($error) && $error != ""){
     echo $error;

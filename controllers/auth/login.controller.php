@@ -18,18 +18,19 @@
         if (isset($_POST['username']) && $_POST['username'] != "" &&
             isset($_POST['password']) && $_POST['password'] != ""
         ){
-            $us_hash = openssl_digest($_POST['username'], "SHA256");
-            $pw_hash = openssl_digest($_POST['password'], "SHA256");
+            $us_hash = openssl_digest(trim($_POST['username']), "SHA256");
+            $pw_hash = openssl_digest(trim($_POST['password']), "SHA256");
 
             $query = "SELECT * FROM users WHERE username = '$us_hash' AND password = '$pw_hash';";
-            
+
             $res = $dbc->query($query);
             if ($res != false){
                 if ($res->num_rows == 1){
                     $r = $res->fetch_array();
-                    $_SESSION['logged_user_id'] = $r['user_id'];
-                    $_SESSION['logged_user_cypher'] = $r['user_private_key'];
-                    echo "<div class='alert alert-success' role='alert'>User authenticated</div>";
+                    $_SESSION['logged_user'] = array("id" => $r['user_id'], "username" => trim($_POST['username']), "cypher_key" => $r['user_private_key']);
+
+                    $_SESSION['success'] = "User ".trim($_POST['username'])." authenticated";
+                    header("Location: home");
                 } else {
                     echo "<div class='alert alert-danger' role='alert'>User or password incorrect</div>";
                 }
