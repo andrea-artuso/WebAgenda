@@ -1,3 +1,4 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,33 +12,12 @@
 </head>
 <body>
 <?php
-    session_start();
-    require_once "core/database.php";
-
-    if ($_SERVER['REQUEST_METHOD'] == "POST"){
-        if (isset($_POST['username']) && $_POST['username'] != "" &&
-            isset($_POST['password']) && $_POST['password'] != ""
-        ){
-            $us_hash = openssl_digest(trim($_POST['username']), "SHA256");
-            $pw_hash = openssl_digest(trim($_POST['password']), "SHA256");
-
-            $query = "SELECT * FROM users WHERE username = '$us_hash' AND password = '$pw_hash';";
-
-            $res = $dbc->query($query);
-            if ($res != false){
-                if ($res->num_rows == 1){
-                    $r = $res->fetch_array();
-                    $_SESSION['logged_user'] = array("id" => $r['user_id'], "username" => trim($_POST['username']), "cypher_key" => $r['user_private_key']);
-
-                    $_SESSION['success'] = "User ".trim($_POST['username'])." authenticated";
-                    header("Location: home");
-                } else {
-                    echo "<div class='alert alert-danger' role='alert'>User or password incorrect</div>";
-                }
-            } else {
-                echo "<div class='alert alert-danger' role='alert'>Something went wrong: ".$dbc->error."</div>";
-            }
-        }
+    if (isset($_SESSION['error'])){
+        echo "<div class='alert alert-danger' role='alert'>".$_SESSION['error']."</div>";
+        unset($_SESSION['error']);
+    } else if (isset($_SESSION['success'])){
+        echo "<div class='alert alert-success' role='alert'>".$_SESSION['success']."</div>";
+        unset($_SESSION['success']);
     }
 ?>
     <form action="login" method="POST">
@@ -48,3 +28,42 @@
     </form>
 </body>
 </html>
+
+<?php
+    require_once "core/database.php";
+
+    if ($_SERVER['REQUEST_METHOD'] == "POST"){
+        if (isset($_POST['username']) && $_POST['username'] != "" &&
+            isset($_POST['password']) && $_POST['password'] != ""
+        ){
+            $us_hash = openssl_digest(trim($_POST['username']), "SHA256");
+            $pw = trim($_POST['password']);
+
+            $query = "SELECT * FROM users WHERE username_hash = ? AND password_hash = SHA2(CONCAT(salt, ?), 256);";
+
+            if ($stmt = $dbc->prepare($query)){
+                if ($stmt->bind_param("ss", $us_hash, $pw) && $stmt->execute()){
+                    $res = $stmt->get_result();
+                    if ($res->num_rows == 1){
+                        $r = $res->fetch_array();
+                        $_SESSION['logged_user'] = array("id" => $r['user_id'], "username" => trim($_POST['username']), "cypher_key" => $r['user_private_key']);
+
+                        $_SESSION['success'] = "User ".trim($_POST['username'])." authenticated";
+                        header("Location: home");
+                    } else {
+                        $_SESSION['error'] = "Username or password incorrect";
+                        header("Location: login");
+                    }
+                } else {
+                    http_response_code(500);
+                    $_SESSION['error'] = "Cannot check credentials";
+                    header("Location: login");
+                }
+            } else {
+                http_response_code(500);
+                $_SESSION['error'] = "Internal server error";
+                header("Location: login");
+            }
+        }
+    }
+?>
