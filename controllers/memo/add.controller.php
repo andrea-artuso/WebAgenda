@@ -1,5 +1,9 @@
 <?php
     session_start();
+    if (!isset($_SESSION['logged_user'])){
+        $_SESSION['error'] = "You need to login to add a new memo.";
+        header('Location: login');
+    }
     require_once "core/database.php";
     require_once "core/cipher.php";
 
