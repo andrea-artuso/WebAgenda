@@ -26,6 +26,7 @@
 
         <input type="submit" name="login" value="Login">
     </form>
+    <button disabled>Login with QR Code</button>
 </body>
 </html>
 
