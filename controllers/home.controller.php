@@ -1,8 +1,10 @@
 <?php
 session_start();
+require_once "core/cipher.php";
 
 if (isset($_SESSION['logged_user'])){
     $id = $_SESSION['logged_user']["id"];
+    $cipherkey = $_SESSION['logged_user']["cipher_key"];
 
     if (isset($_SESSION['success'])){
         echo "<div class='alert alert-success' role='alert'>".$_SESSION['success']."</div>";

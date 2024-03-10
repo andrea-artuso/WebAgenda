@@ -29,11 +29,20 @@ echo "<br>";
 if (isset($error) && $error != ""){
     echo $error;
 } else {
+    require_once "core/cipher.php";
+
     if ($result->num_rows == 0){
-        echo "No records found on date $date.";
+        echo "No records found ".(isset($_GET['d']) ? 'on date '.$date : "today").".";
     } else {
         while ($row = $result->fetch_array()){
-            echo $row['memo_title'] . "<br>";
+            echo "<div style='padding: 10px'>";
+            echo "<h1>".decrypt($row['memo_title'], $cipherkey)."</h1>";
+            echo "<h4>Date: ".$row['memo_date']."</h4>";
+            if (!empty($row['memo_time'])){
+                echo "<h4>Time: ".$row['memo_time']."</h4>";
+            }
+            echo "<p>".decrypt($row['memo_text'], $cipherkey)."</p>";
+            echo "</div>";
         }
     }
 }

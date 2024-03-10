@@ -19,14 +19,11 @@ switch (strtolower($reversedpath[0])){
     case "logout":
         include "controllers/auth/logout.controller.php";
         break;
-    case "add":
-        router_crud_handler("add", strtolower($reversedpath[1]));
+    case "memo":
+        router_action_handler("memo");
         break;
-    case "edit":
-        router_crud_handler("edit", strtolower($reversedpath[1]));
-        break;
-    case "delete":
-        router_crud_handler("delete", strtolower($reversedpath[1]));
+    case "category":
+        router_action_handler("category");
         break;
     default:
         // 404
@@ -35,11 +32,14 @@ switch (strtolower($reversedpath[0])){
 }
 
 
-function router_crud_handler($operation, $resource){
-    if (in_array($resource, RESOURCES)){
-        include "controllers/$resource/$operation.controller.php";
+function router_action_handler($resource){
+    if (isset($_GET['add'])){
+        include "controllers/$resource/add.controller.php";
+    } else if (isset($_GET['edit'])){
+        include "controllers/$resource/edit.controller.php";
+    } else if (isset($_GET['delete'])) {
+        include "controllers/$resource/delete.controller.php";
     } else {
-        // 404
-        include "views/errors/404.php";
+        header("Location: home");
     }
 }

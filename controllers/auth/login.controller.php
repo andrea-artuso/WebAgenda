@@ -46,7 +46,7 @@
                     $res = $stmt->get_result();
                     if ($res->num_rows == 1){
                         $r = $res->fetch_array();
-                        $_SESSION['logged_user'] = array("id" => $r['user_id'], "username" => trim($_POST['username']), "cypher_key" => $r['user_private_key']);
+                        $_SESSION['logged_user'] = array("id" => $r['user_id'], "username" => trim($_POST['username']), "cipher_key" => $r['user_private_key']);
 
                         $_SESSION['success'] = "User ".trim($_POST['username'])." authenticated";
                         header("Location: home");
@@ -56,12 +56,12 @@
                     }
                 } else {
                     http_response_code(500);
-                    $_SESSION['error'] = "Cannot check credentials";
+                    $_SESSION['error'] = "Internal server error: ".$dbc->error;
                     header("Location: login");
                 }
             } else {
                 http_response_code(500);
-                $_SESSION['error'] = "Internal server error";
+                $_SESSION['error'] = "Internal server error: ".$dbc->error;
                 header("Location: login");
             }
         }

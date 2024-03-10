@@ -46,7 +46,7 @@
                 if ($_POST['password'] == $_POST['password1']){
                     $salt = md5(rand());
                     $pw_hash = openssl_digest($salt . $_POST['password'], "SHA256");
-                    $private_key = md5($us_hash . rand() . time());
+                    $private_key = random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
 
                     $ins_query = "INSERT INTO users (username_hash, password_hash, salt, email, user_private_key) VALUES (?,?,?,?,?);";
                     if ($stmt = $dbc->prepare($ins_query)){
